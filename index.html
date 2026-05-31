@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>给我的小朋友 - 高考加油</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pink: {
+              50: '#fff5fa', 100: '#ffe6f0', 200: '#ffd6e8', 300: '#ffb8d4',
+              400: '#ff8ab9', 500: '#ff6b9d', 600: '#f06292',
+            },
+            purple: { 100: '#f8e8ff', 200: '#f0d0ff', 300: '#e0b0ff', 400: '#c884f0' },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --pink-50: #fff5fa; --pink-100: #ffe6f0; --pink-200: #ffd6e8;
+      --pink-300: #ffb8d4; --pink-400: #ff8ab9; --pink-500: #ff6b9d;
+      --purple-100: #f8e8ff; --purple-200: #f0d0ff;
+      --radius-lg: 24px; --radius-md: 16px; --radius-sm: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0; padding: 0;
+      font-family: 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(180deg, #ffe6f0 0%, #fff5fa 15%, #ffd6e8 30%, #f8e8ff 50%, #ffe6f0 70%, #fff5fa 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      color: #4a3040;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ========== 浮动装饰 ========== */
+    .floating-decorations {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .float-item {
+      position: absolute; bottom: -60px;
+      animation: floatUp linear infinite;
+      opacity: 0.55; user-select: none;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+      5% { opacity: 0.55; }
+      85% { opacity: 0.45; }
+      100% { transform: translateY(-110vh) translateX(40px) rotate(360deg); opacity: 0; }
+    }
+
+    /* ========== 主容器 ========== */
+    .main-container {
+      position: relative; z-index: 1;
+      max-width: 430px; margin: 0 auto;
+      padding: 16px 16px 40px;
+    }
+
+    /* ========== 毛玻璃卡片 ========== */
+    .glass-card {
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 4px 24px rgba(255,107,157,0.10), 0 1px 4px rgba(0,0,0,0.04);
+      border: 1px solid rgba(255,255,255,0.7);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .glass-card:active {
+      transform: scale(0.985);
+      box-shadow: 0 2px 12px rgba(255,107,157,0.08);
+    }
+
+    /* 小卡片 */
+    .glass-card-sm {
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: var(--radius-md);
+      box-shadow: 0 2px 16px rgba(255,107,157,0.08);
+      border: 1px solid rgba(255,255,255,0.65);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    /* ========== 滚动入场动画 ========== */
+    .fade-in-section {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-in-section.visible {
+      opacity: 1; transform: translateY(0);
+    }
+
+    /* ========== Hero 区域 ========== */
+    .hero-section {
+      text-align: center; padding: 36px 16px 28px;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--pink-300), var(--pink-400));
+      color: #fff; font-size: 13px; font-weight: 500;
+      padding: 6px 18px; border-radius: 20px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 16px rgba(255,107,157,0.25);
+      animation: badgePulse 2.5s ease-in-out infinite;
+    }
+    @keyframes badgePulse {
+      0%,100% { box-shadow: 0 4px 16px rgba(255,107,157,0.25); }
+      50% { box-shadow: 0 4px 28px rgba(255,107,157,0.45); }
+    }
+    .hero-title {
+      font-size: 28px; font-weight: 700; color: #4a3040;
+      margin: 18px 0 8px; line-height: 1.4;
+    }
+    .hero-subtitle {
+      font-size: 15px; color: #8a6070; line-height: 1.8;
+      margin: 0;
+    }
+
+    /* ========== 倒计时 ========== */
+    .countdown-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+      margin-top: 14px;
+    }
+    .countdown-item {
+      text-align: center;
+      background: rgba(255,255,255,0.45);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: var(--radius-md); padding: 12px 4px;
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+    .countdown-num {
+      font-size: 32px; font-weight: 700;
+      background: linear-gradient(135deg, #ff6b9d, #c884f0);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+    }
+    .countdown-label {
+      font-size: 12px; color: #9a7a88; margin-top: 4px;
+    }
+
+    /* ========== 音频卡片 ========== */
+    .audio-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; margin-bottom: 10px;
+      cursor: pointer; user-select: none;
+      transition: all 0.25s ease;
+    }
+    .audio-card:hover, .audio-card:active {
+      background: rgba(255,255,255,0.7);
+    }
+    .audio-card.playing {
+      background: rgba(255,182,193,0.3);
+      border-color: rgba(255,107,157,0.4);
+    }
+    .audio-play-btn {
+      width: 42px; height: 42px; min-width: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff8ab9, #ff6b9d);
+      border: none; color: #fff; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s ease;
+      box-shadow: 0 3px 12px rgba(255,107,157,0.25);
+    }
+    .audio-play-btn:active { transform: scale(0.9); }
+    .audio-play-btn.playing {
+      background: linear-gradient(135deg, #c884f0, #a060e0);
+    }
+    .audio-info { flex: 1; min-width: 0; }
+    .audio-title { font-size: 14px; font-weight: 600; color: #4a3040; }
+    .audio-desc { font-size: 12px; color: #9a7a88; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .audio-time { font-size: 11px; color: #b898a8; }
+
+    /* ========== 呼吸动画 ========== */
+    .breathing-circle {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,138,185,0.3), rgba(255,107,157,0.08));
+      margin: 0 auto 16px;
+      animation: breathe 12s ease-in-out infinite;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .breathing-circle .inner {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #ffb8d4, #ff8ab9);
+      box-shadow: 0 4px 20px rgba(255,107,157,0.3);
+    }
+    @keyframes breathe {
+      0%       { transform: scale(1); }
+      33.33%   { transform: scale(1.45); }
+      50%      { transform: scale(1.45); }
+      100%     { transform: scale(1); }
+    }
+    .breathe-text { font-size: 14px; color: #ff6b9d; font-weight: 500; transition: all 0.5s ease; }
+
+    /* ========== Checklist ========== */
+    .checklist-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; margin-bottom: 6px;
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.4);
+      cursor: pointer; user-select: none;
+      transition: all 0.2s ease;
+    }
+    .checklist-item:active { background: rgba(255,255,255,0.6); }
+    .check-dot {
+      width: 24px; height: 24px; min-width: 24px;
+      border-radius: 50%;
+      border: 2px solid #e0b0c0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.25s ease;
+      font-size: 12px; color: transparent;
+    }
+    .checklist-item.checked .check-dot {
+      background: #ff6b9d; border-color: #ff6b9d;
+      color: #fff;
+    }
+    .checklist-item.checked .check-label {
+      color: #b898a8; text-decoration: line-through;
+      text-decoration-color: #e0c0d0;
+    }
+    .check-label { font-size: 15px; color: #4a3040; transition: all 0.25s ease; }
+
+    /* ========== 鼓励按钮 ========== */
+    .btn-encourage {
+      display: block; width: 100%; max-width: 280px; margin: 0 auto;
+      padding: 14px 0;
+      background: linear-gradient(135deg, #ff8ab9, #ff6b9d);
+      color: #fff; font-size: 17px; font-weight: 600;
+      border: none; border-radius: 28px;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(255,107,157,0.3);
+      transition: all 0.25s ease;
+      letter-spacing: 1px;
+    }
+    .btn-encourage:active { transform: scale(0.94); box-shadow: 0 3px 12px rgba(255,107,157,0.2); }
+
+    /* 鼓励语弹出 */
+    .encourage-result {
+      text-align: center; font-size: 16px; color: #ff6b9d;
+      min-height: 48px; display: flex; align-items: center; justify-content: center;
+      margin-top: 14px; padding: 12px 20px;
+      background: rgba(255,255,255,0.5);
+      border-radius: var(--radius-md);
+      transition: all 0.4s ease;
+      line-height: 1.6;
+    }
+
+    /* 弹出爱心 */
+    .pop-heart {
+      position: fixed; pointer-events: none; z-index: 999;
+      animation: popHeart 1.2s ease-out forwards;
+      font-size: 28px;
+    }
+    @keyframes popHeart {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      50% { opacity: 0.9; transform: translateY(-60px) scale(1.3); }
+      100% { opacity: 0; transform: translateY(-120px) scale(0.6); }
+    }
+
+    /* ========== 心形按钮 ========== */
+    .btn-heart {
+      width: 60px; height: 60px; margin: 0 auto;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff6b9d, #ff8ab9);
+      border: none; color: #fff; font-size: 26px;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(255,107,157,0.35);
+      transition: all 0.3s ease;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .btn-heart:active { transform: scale(0.85); box-shadow: 0 3px 12px rgba(255,107,157,0.2); }
+
+    /* ========== Toast ========== */
+    .toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: rgba(74,48,64,0.9); color: #fff; font-size: 15px;
+      padding: 12px 24px; border-radius: 24px;
+      z-index: 1000; opacity: 0;
+      transition: all 0.4s ease; pointer-events: none;
+      backdrop-filter: blur(8px);
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ========== 照片卡片滑动 ========== */
+    .photo-scroll {
+      display: flex; gap: 12px; overflow-x: auto;
+      padding-bottom: 8px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .photo-scroll::-webkit-scrollbar { height: 0; }
+    .photo-card {
+      min-width: 150px; scroll-snap-align: start;
+      border-radius: var(--radius-md); overflow: hidden;
+      flex-shrink: 0;
+    }
+    .photo-placeholder {
+      width: 100%; height: 180px;
+      background: linear-gradient(135deg, #ffd6e8, #f0d0ff, #ffe6f0);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+    }
+    .photo-caption {
+      text-align: center; font-size: 13px; color: #8a6070;
+      padding: 10px 8px; background: rgba(255,255,255,0.6);
+    }
+
+    /* ========== 分区标题 ========== */
+    .section-title {
+      font-size: 20px; font-weight: 700; color: #4a3040;
+      text-align: center; margin-bottom: 4px;
+    }
+    .section-subtitle {
+      font-size: 13px; color: #9a7a88; text-align: center;
+      margin-bottom: 16px; line-height: 1.6;
+    }
+
+    /* 分隔装饰 */
+    .divider-dots {
+      text-align: center; color: #e0b0c0; font-size: 10px;
+      letter-spacing: 6px; margin: 8px 0;
+    }
+
+    /* ========== 移动端优化 ========== */
+    @media (max-width: 380px) {
+      .hero-title { font-size: 24px; }
+      .countdown-num { font-size: 26px; }
+      .section-title { font-size: 18px; }
+      .photo-card { min-width: 130px; }
+      .photo-placeholder { height: 150px; }
+    }
+    @media (min-width: 431px) {
+      .main-container { padding: 20px 20px 48px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== 浮动装饰层 ==================== -->
+  <div class="floating-decorations" id="floatingLayer"></div>
+
+  <!-- ==================== 主容器 ==================== -->
+  <div class="main-container" id="mainContainer">
+
+    <!-- ========== 1. Hero 欢迎区 ========== -->
+    <div class="hero-section fade-in-section" id="heroSection">
+      <div class="hero-badge">今日份专属鼓励已送达</div>
+      <h1 class="hero-title">给我的小朋友：<br>高考加油呀！</h1>
+      <p class="hero-subtitle">
+        愿你提笔从容，落笔生花。<br>
+        你只管勇敢向前，我会一直在你身后。
+      </p>
+    </div>
+
+    <!-- ========== 2. 倒计时模块 ========== -->
+    <div class="fade-in-section">
+      <div class="glass-card" style="padding:20px 16px; margin-bottom:16px;">
+        <p style="text-align:center; font-size:14px; color:#9a7a88; margin:0 0 4px;">距离高考还有</p>
+        <div class="countdown-grid">
+          <div class="countdown-item">
+            <div class="countdown-num" id="countDays">--</div>
+            <div class="countdown-label">天</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-num" id="countHours">--</div>
+            <div class="countdown-label">小时</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-num" id="countMins">--</div>
+            <div class="countdown-label">分钟</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-num" id="countSecs">--</div>
+            <div class="countdown-label">秒</div>
+          </div>
+        </div>
+        <p style="text-align:center; font-size:13px; color:#b898a8; margin:12px 0 0; line-height:1.6;">
+          别害怕，时间不是压力，是你一步步靠近梦想的证明。
+        </p>
+      </div>
+    </div>
+
+    <!-- ========== 3. 鼓励文案卡片 ========== -->
+    <div class="fade-in-section">
+      <h2 class="section-title">想对你说的悄悄话</h2>
+      <p class="section-subtitle">每句话都是真心实意的喜欢和陪伴。</p>
+
+      <!-- 卡片1 -->
+      <div class="glass-card-sm" style="padding:18px 16px; margin-bottom:10px;">
+        <p style="font-size:14px; line-height:1.8; margin:0;">
+          你已经走了很远很远啦，<br>剩下的路，不需要完美，<br>只要稳稳地走完就好。
+        </p>
+      </div>
+      <!-- 卡片2 -->
+      <div class="glass-card-sm" style="padding:18px 16px; margin-bottom:10px;">
+        <p style="font-size:14px; line-height:1.8; margin:0;">
+          高考不是终点，<br>是你青春里一次很勇敢的奔赴。<br>无论结果如何，你都是我心里最闪闪发光的人。
+        </p>
+      </div>
+      <!-- 卡片3 -->
+      <div class="glass-card-sm" style="padding:18px 16px; margin-bottom:10px;">
+        <p style="font-size:14px; line-height:1.8; margin:0;">
+          考场上的你，<br>一定会比想象中更冷静、更坚定。<br>慢慢写，认真想，别慌张。
+        </p>
+      </div>
+      <!-- 卡片4 -->
+      <div class="glass-card-sm" style="padding:18px 16px; margin-bottom:10px;">
+        <p style="font-size:14px; line-height:1.8; margin:0;">
+          这段日子辛苦啦。<br>你熬过的夜、刷过的题、背过的书，<br>都会在某一刻悄悄托住你。
+        </p>
+      </div>
+      <!-- 卡片5 -->
+      <div class="glass-card-sm" style="padding:18px 16px; margin-bottom:10px;">
+        <p style="font-size:14px; line-height:1.8; margin:0;">
+          答案在笔下，<br>未来在路上，<br>而我在你身旁。
+        </p>
+      </div>
+    </div>
+
+    <!-- ========== 4. 专属语音加油站 ========== -->
+    <div class="fade-in-section" style="margin-top:24px;">
+      <h2 class="section-title">专属语音加油站</h2>
+      <p class="section-subtitle">这里会放满我想对你说的话，想我的时候就点开听听。</p>
+
+      <div id="audioList">
+        <!-- JS 动态生成 -->
+      </div>
+    </div>
+
+    <!-- ========== 5. 今日鼓励按钮 ========== -->
+    <div class="fade-in-section" style="margin-top:24px;">
+      <div class="glass-card" style="padding:24px 16px;">
+        <h2 class="section-title" style="margin-bottom:12px;">抽一句今日鼓励</h2>
+        <button class="btn-encourage" id="btnEncourage" onclick="drawEncouragement()">
+          抽一句今日鼓励
+        </button>
+        <div class="encourage-result" id="encourageResult">
+          点击上面的按钮，随机收获一份鼓励吧
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 6. 考前放松小角落 ========== -->
+    <div class="fade-in-section" style="margin-top:24px;">
+      <h2 class="section-title">考前放松小角落</h2>
+      <p class="section-subtitle">累了就来这里休息一下。</p>
+
+      <!-- 呼吸动画 -->
+      <div class="glass-card" style="padding:24px 16px; margin-bottom:12px; text-align:center;">
+        <div class="breathing-circle" id="breatheCircle">
+          <div class="inner"></div>
+        </div>
+        <p class="breathe-text" id="breatheText">吸气……</p>
+        <p style="font-size:13px; color:#9a7a88; line-height:1.6; margin:0;">
+          吸气 4 秒，停 2 秒，呼气 6 秒。<br>让心慢慢安静下来。
+        </p>
+      </div>
+
+      <!-- 喝口水 -->
+      <div class="glass-card-sm" style="padding:16px; margin-bottom:10px; display:flex; align-items:center; gap:12px;">
+        <span style="font-size:36px;">💧</span>
+        <div>
+          <p style="font-size:15px; font-weight:600; color:#4a3040; margin:0;">喝口水</p>
+          <p style="font-size:13px; color:#9a7a88; margin:4px 0 0; line-height:1.6;">
+            紧张的时候，先照顾好身体。你不是机器，你需要被温柔对待。
+          </p>
+        </div>
+      </div>
+
+      <!-- 抱抱自己 -->
+      <div class="glass-card-sm" style="padding:16px; display:flex; align-items:center; gap:12px;">
+        <span style="font-size:36px;">🤗</span>
+        <div>
+          <p style="font-size:15px; font-weight:600; color:#4a3040; margin:0;">抱抱自己</p>
+          <p style="font-size:13px; color:#9a7a88; margin:4px 0 0; line-height:1.6;">
+            对自己说一句：我已经尽力了。然后继续往前走。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 7. 考前小清单 ========== -->
+    <div class="fade-in-section" style="margin-top:24px;">
+      <h2 class="section-title">进考场前检查一下</h2>
+      <p class="section-subtitle">点击每一项，勾选确认后心里更有底。</p>
+
+      <div id="checklist">
+        <!-- JS 动态生成 -->
+      </div>
+    </div>
+
+    <!-- ========== 8. 小相册 ========== -->
+    <div class="fade-in-section" style="margin-top:24px;">
+      <h2 class="section-title">给你的一点点可爱</h2>
+      <p class="section-subtitle">
+        <!-- 替换说明：在下面的 photo-placeholder 里把渐变背景替换成 <img> 标签 -->
+        这里会放满我们之间的美好回忆。
+      </p>
+
+      <div class="photo-scroll">
+        <!-- 图片1 -->
+        <div class="photo-card glass-card-sm" style="overflow:hidden;">
+          <div class="photo-placeholder">🌸</div>
+          <div class="photo-caption">要一直开心呀</div>
+        </div>
+        <!-- 图片2 -->
+        <div class="photo-card glass-card-sm" style="overflow:hidden;">
+          <div class="photo-placeholder" style="background:linear-gradient(135deg,#f0d0ff,#ffe6f0,#ffd6e8);">✨</div>
+          <div class="photo-caption">你的未来会很亮</div>
+        </div>
+        <!-- 图片3 -->
+        <div class="photo-card glass-card-sm" style="overflow:hidden;">
+          <div class="photo-placeholder" style="background:linear-gradient(135deg,#ffe6f0,#ffd6e8,#f8e8ff);">💖</div>
+          <div class="photo-caption">慢慢来，也很了不起</div>
+        </div>
+        <!-- 图片4 -->
+        <div class="photo-card glass-card-sm" style="overflow:hidden;">
+          <div class="photo-placeholder" style="background:linear-gradient(135deg,#ffd6e8,#f8e8ff,#ffe6f0);">🌟</div>
+          <div class="photo-caption">所有美好都在路上</div>
+        </div>
+        <!-- 图片5 -->
+        <div class="photo-card glass-card-sm" style="overflow:hidden;">
+          <div class="photo-placeholder" style="background:linear-gradient(135deg,#f8e8ff,#ffd6e8,#f0d0ff);">💕</div>
+          <div class="photo-caption">今天也喜欢你</div>
+        </div>
+        <!-- 图片6 -->
+        <div class="photo-card glass-card-sm" style="overflow:hidden;">
+          <div class="photo-placeholder" style="background:linear-gradient(135deg,#ffd6e8,#ffe6f0,#ffb8d4);">🫶</div>
+          <div class="photo-caption">辛苦啦，我的小朋友</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 9. 最后的告白和祝福 ========== -->
+    <div class="fade-in-section" style="margin-top:28px;">
+      <h2 class="section-title">最后，想认真告诉你</h2>
+      <div class="divider-dots">· · ·</div>
+
+      <div class="glass-card" style="padding:24px 18px; text-align:center;">
+        <p style="font-size:15px; line-height:2; color:#5a4050; margin:0;">
+          高考当然很重要，<br>但<strong>你比高考更重要</strong>。<br><br>
+          我希望你考出理想的成绩，<br>
+          也希望你在这段日子里，<br>
+          能好好吃饭、好好睡觉、好好爱自己。<br><br>
+          不管前面是什么结果，<br>
+          我都会陪你一起往前走。<br><br>
+          你只管加油，<br>
+          剩下的拥抱、安慰和喜欢，<br>
+          都交给我。
+        </p>
+        <p style="margin-top:20px; font-size:14px; color:#b898a8;">
+          —— 永远给你加油的人
+        </p>
+      </div>
+
+      <div style="text-align:center; margin-top:24px;">
+        <button class="btn-heart" onclick="showFinalToast()">
+          💛
+        </button>
+        <p style="font-size:12px; color:#c8a0b0; margin-top:8px;">点一下这颗心</p>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:40px; padding-bottom:20px;">
+      <p style="font-size:12px; color:#d0b0c0;">🌷 所有的努力都会发光 🌷</p>
+    </div>
+  </div>
+
+  <!-- ==================== Toast ==================== -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ==================== 初始化 ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      generateAudioCards();
+      generateChecklist();
+      initFloatingDecorations();
+      initScrollObserver();
+      startCountdown();
+      initBreathingAnimation();
+      // 页面加载淡入
+      requestAnimationFrame(() => {
+        document.getElementById('heroSection').classList.add('visible');
+      });
+    });
+
+    // ==================== 浮动装饰生成 ====================
+    function initFloatingDecorations() {
+      const layer = document.getElementById('floatingLayer');
+      const emojis = ['💖', '💕', '💗', '🌸', '✨', '⭐', '🌟', '💫', '🩷', '☁️', '💝', '🎀', '🫧'];
+
+      for (let i = 0; i < 22; i++) {
+        const el = document.createElement('span');
+        el.className = 'float-item';
+        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        el.style.left = Math.random() * 95 + '%';
+        el.style.fontSize = (12 + Math.random() * 20) + 'px';
+        el.style.animationDuration = (10 + Math.random() * 18) + 's';
+        el.style.animationDelay = Math.random() * 15 + 's';
+        layer.appendChild(el);
+      }
+    }
+
+    // ==================== 滚动入场观察器 ====================
+    function initScrollObserver() {
+      const sections = document.querySelectorAll('.fade-in-section');
+      // 跳过 hero（已处理）
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+
+      sections.forEach((sec, i) => {
+        if (i === 0) return; // hero 已手动显示
+        observer.observe(sec);
+      });
+    }
+
+    // ==================== 倒计时 ====================
+    function startCountdown() {
+      // 目标日期：2026年6月7日 09:00:00
+      const target = new Date('2026-06-07T09:00:00+08:00').getTime();
+
+      function update() {
+        const now = Date.now();
+        let diff = target - now;
+
+        if (diff <= 0) {
+          document.getElementById('countDays').textContent = '0';
+          document.getElementById('countHours').textContent = '0';
+          document.getElementById('countMins').textContent = '0';
+          document.getElementById('countSecs').textContent = '0';
+          return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        diff -= days * 1000 * 60 * 60 * 24;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        diff -= hours * 1000 * 60 * 60;
+        const mins = Math.floor(diff / (1000 * 60));
+        diff -= mins * 1000 * 60;
+        const secs = Math.floor(diff / 1000);
+
+        document.getElementById('countDays').textContent = String(days).padStart(2, '0');
+        document.getElementById('countHours').textContent = String(hours).padStart(2, '0');
+        document.getElementById('countMins').textContent = String(mins).padStart(2, '0');
+        document.getElementById('countSecs').textContent = String(secs).padStart(2, '0');
+      }
+
+      update();
+      setInterval(update, 1000);
+    }
+
+    // ==================== 音频卡片生成 ====================
+    const audioTracks = [
+      { title: '早上醒来听这一条', desc: '给你一点早晨的勇气', icon: '☀️', src: 'audio/audio1.mp3' },
+      { title: '紧张的时候听这一条', desc: '先深呼吸，我陪你慢慢来', icon: '💆‍♀️', src: 'audio/audio2.mp3' },
+      { title: '睡前放松听这一条', desc: '今天已经很棒了，早点休息', icon: '🌙', src: 'audio/audio3.mp3' },
+      { title: '进考场前听这一条', desc: '别怕，你准备得很好', icon: '🎒', src: 'audio/audio4.mp3' },
+      { title: '想哭的时候听这一条', desc: '委屈可以有，但不要怀疑自己', icon: '💧', src: 'audio/audio5.mp3' },
+      { title: '考完一科后听这一条', desc: '不管发挥如何，下一科继续向前', icon: '📝', src: 'audio/audio6.mp3' },
+      { title: '觉得累的时候听这一条', desc: '累了就停一停，抱抱你', icon: '🫂', src: 'audio/audio7.mp3' },
+      { title: '永远都可以听这一条', desc: '这是长期有效的喜欢和陪伴', icon: '💝', src: 'audio/audio8.mp3' },
+    ];
+
+    let currentAudio = null;  // 当前正在播放的 audio 元素
+    let currentCard = null;   // 当前播放状态的卡片 DOM
+
+    function generateAudioCards() {
+      const container = document.getElementById('audioList');
+      container.innerHTML = audioTracks.map((track, i) => `
+        <div class="glass-card-sm audio-card" id="audioCard${i}" onclick="toggleAudio(${i}, event)">
+          <button class="audio-play-btn" id="audioBtn${i}">
+            <i class="fa fa-play"></i>
+          </button>
+          <div class="audio-info">
+            <div class="audio-title">${track.icon} ${track.title}</div>
+            <div class="audio-desc">${track.desc}</div>
+          </div>
+          <div class="audio-time" id="audioTime${i}">待添加</div>
+        </div>
+        <audio id="audioEl${i}" src="${track.src}" preload="none"
+          onloadedmetadata="updateDuration(${i})"
+          onerror="handleAudioError(${i})"
+          ontimeupdate="updateTimeDisplay(${i})"
+          onended="onAudioEnded(${i})">
+        </audio>
+      `).join('');
+    }
+
+    function toggleAudio(index, event) {
+      if (event) event.stopPropagation();
+
+      const audio = document.getElementById('audioEl' + index);
+      const btn = document.getElementById('audioBtn' + index);
+      const card = document.getElementById('audioCard' + index);
+
+      // 如果当前有别的音频在播放，暂停它
+      if (currentAudio && currentAudio !== audio) {
+        currentAudio.pause();
+        if (currentCard) currentCard.classList.remove('playing');
+        if (currentAudio._btnEl) {
+          currentAudio._btnEl.innerHTML = '<i class="fa fa-play"></i>';
+        }
+      }
+
+      if (audio.paused || audio.ended) {
+        // 尝试播放
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            // 播放成功
+            audio._btnEl = btn;
+            btn.innerHTML = '<i class="fa fa-pause"></i>';
+            btn.classList.add('playing');
+            card.classList.add('playing');
+            currentAudio = audio;
+            currentCard = card;
+          }).catch(() => {
+            // 音频文件不存在或无法播放，静默处理
+            showToast('这条录音还未添加哦，敬请期待~');
+          });
+        }
+      } else {
+        // 暂停
+        audio.pause();
+        btn.innerHTML = '<i class="fa fa-play"></i>';
+        btn.classList.remove('playing');
+        card.classList.remove('playing');
+        currentAudio = null;
+        currentCard = null;
+      }
+    }
+
+    function onAudioEnded(index) {
+      const btn = document.getElementById('audioBtn' + index);
+      const card = document.getElementById('audioCard' + index);
+      if (btn) btn.innerHTML = '<i class="fa fa-play"></i>';
+      if (btn) btn.classList.remove('playing');
+      if (card) card.classList.remove('playing');
+      currentAudio = null;
+      currentCard = null;
+    }
+
+    function updateDuration(index) {
+      const audio = document.getElementById('audioEl' + index);
+      const timeEl = document.getElementById('audioTime' + index);
+      if (audio.duration && isFinite(audio.duration)) {
+        const mins = Math.floor(audio.duration / 60);
+        const secs = Math.floor(audio.duration % 60);
+        timeEl.textContent = `${mins}:${String(secs).padStart(2, '0')}`;
+      }
+    }
+
+    function updateTimeDisplay(index) {
+      const audio = document.getElementById('audioEl' + index);
+      const timeEl = document.getElementById('audioTime' + index);
+      if (audio.duration && isFinite(audio.duration) && !audio.paused) {
+        const remain = audio.duration - audio.currentTime;
+        const mins = Math.floor(remain / 60);
+        const secs = Math.floor(remain % 60);
+        timeEl.textContent = `-${mins}:${String(secs).padStart(2, '0')}`;
+      }
+    }
+
+    function handleAudioError(index) {
+      const timeEl = document.getElementById('audioTime' + index);
+      if (timeEl) timeEl.textContent = '待添加';
+      const btn = document.getElementById('audioBtn' + index);
+      if (btn) {
+        btn.innerHTML = '<i class="fa fa-play"></i>';
+        btn.classList.remove('playing');
+      }
+      const card = document.getElementById('audioCard' + index);
+      if (card) card.classList.remove('playing');
+    }
+
+    // ==================== 鼓励语抽取 ====================
+    const encouragements = [
+      '你一定可以稳稳地走完这段路。',
+      '别急，慢慢来，你已经很棒了。',
+      '今天也要相信自己一点点。',
+      '你努力的样子，真的很漂亮。',
+      '考场只是一个房间，梦想却在更远的地方。',
+      '深呼吸，别慌张，答案会慢慢出现。',
+      '不需要超常发挥，正常发挥就已经很好。',
+      '我永远站在你这一边。',
+      '你已经准备得足够好了，放轻松就好。',
+      '只管向前走吧，一切都会如约而至。',
+      '你的每一份付出，都在悄悄为你铺路。',
+      '这一次，你只需要做你自己。',
+    ];
+
+    function drawEncouragement() {
+      const resultEl = document.getElementById('encourageResult');
+      const btn = document.getElementById('btnEncourage');
+
+      // 随机选一条
+      const idx = Math.floor(Math.random() * encouragements.length);
+      resultEl.textContent = encouragements[idx];
+      resultEl.style.opacity = '0';
+      resultEl.style.transform = 'translateY(8px)';
+      requestAnimationFrame(() => {
+        resultEl.style.transition = 'all 0.35s ease';
+        resultEl.style.opacity = '1';
+        resultEl.style.transform = 'translateY(0)';
+      });
+
+      // 弹出爱心
+      spawnHearts(btn);
+    }
+
+    function spawnHearts(sourceEl) {
+      const rect = sourceEl.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top;
+
+      const hearts = ['💖', '💕', '💗', '✨', '🌟', '💝'];
+      for (let i = 0; i < 8; i++) {
+        const heart = document.createElement('span');
+        heart.className = 'pop-heart';
+        heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+        heart.style.left = (cx + (Math.random() - 0.5) * 120) + 'px';
+        heart.style.top = (cy + (Math.random() - 0.5) * 20) + 'px';
+        heart.style.animationDuration = (0.8 + Math.random() * 1.2) + 's';
+        heart.style.fontSize = (20 + Math.random() * 16) + 'px';
+        document.body.appendChild(heart);
+
+        heart.addEventListener('animationend', () => heart.remove());
+      }
+    }
+
+    // ==================== Checklist 生成 ====================
+    const checklistItems = [
+      '准考证', '身份证', '2B 铅笔', '黑色签字笔', '橡皮',
+      '尺子/圆规等工具', '透明笔袋', '水和纸巾', '好心情', '相信自己'
+    ];
+
+    function generateChecklist() {
+      const container = document.getElementById('checklist');
+      container.innerHTML = checklistItems.map((item, i) => `
+        <div class="checklist-item" id="checkItem${i}" onclick="toggleCheck(${i})">
+          <div class="check-dot"><i class="fa fa-check"></i></div>
+          <span class="check-label">${item}</span>
+        </div>
+      `).join('');
+    }
+
+    function toggleCheck(index) {
+      const item = document.getElementById('checkItem' + index);
+      item.classList.toggle('checked');
+    }
+
+    // ==================== 呼吸动画 ====================
+    function initBreathingAnimation() {
+      const textEl = document.getElementById('breatheText');
+      const TOTAL = 12000; // 总周期 12s：吸气4s + 屏息2s + 呼气6s
+
+      function cycle() {
+        textEl.textContent = '吸气……';
+        setTimeout(() => { textEl.textContent = '屏息……'; }, 4000);
+        setTimeout(() => { textEl.textContent = '呼气……'; }, 6000);
+        setTimeout(cycle, TOTAL);
+      }
+
+      cycle();
+    }
+
+    // ==================== 底部心形 Toast ====================
+    function showFinalToast() {
+      const messages = [
+        '抱抱你，真的辛苦啦。',
+        '你永远是我心里最棒的小朋友。',
+        '不管怎样，我都为你骄傲。',
+        '谢谢你这段时间的坚持和努力。',
+        '考完带你去吃所有想吃的东西！',
+        '你是最勇敢的小朋友。',
+      ];
+      const msg = messages[Math.floor(Math.random() * messages.length)];
+      showToast(msg);
+      // 也弹出爱心
+      const btn = document.querySelector('.btn-heart');
+      spawnHearts(btn);
+    }
+
+    // ==================== Toast 工具函数 ====================
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toast._timeout);
+      toast._timeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+  </script>
+</body>
+</html>
