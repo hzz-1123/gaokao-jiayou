@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>给我的小朋友 - 高考加油</title>
+  <title>昕瑶的高考加油站 💛</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -507,7 +507,7 @@
     <!-- ========== 1. Hero ========== -->
     <div class="hero-section fade-in-section" id="heroSection">
       <div class="hero-badge">今日份专属鼓励已送达</div>
-      <h1 class="hero-title">给我的小朋友：<br>高考加油呀！</h1>
+      <h1 class="hero-title">昕光初现，瑶玉生辉——<br>给我的小朋友加油</h1>
       <p class="hero-subtitle">
         愿你提笔从容，落笔生花。<br>
         你只管勇敢向前，我会一直在你身后。
@@ -580,7 +580,7 @@
       <div class="glass-card-sm" style="padding:18px 16px; margin-bottom:10px; position:relative;">
         <span class="card-heart" data-card="4" onclick="toggleCardHeart(event,4)"><i class="fa fa-heart-o"></i></span>
         <p style="font-size:14px; line-height:1.8; margin:0;">
-          答案在笔下，<br>未来在路上，<br>而我在你身旁。
+          你的名字里有光，<br>所以无论去哪里，<br>都会亮。
         </p>
       </div>
     </div>
@@ -707,6 +707,7 @@
       <div class="glass-card" style="padding:24px 18px; text-align:center;">
         <p style="font-size:15px; line-height:2; color:#5a4050; margin:0;">
           高考当然很重要，<br>但<strong>你比高考更重要</strong>。<br><br>
+          昕瑶，你比任何成绩都珍贵。<br><br>
           我希望你考出理想的成绩，<br>
           也希望你在这段日子里，<br>
           能好好吃饭、好好睡觉、好好爱自己。<br><br>
@@ -1014,6 +1015,11 @@
       startCountdown();
       initBreathingAnimation();
       initMusic();
+      // 预加载第一首歌，减少首次点击播放的等待时间
+      if (bgMusic && SONG_LIST.length > 0) {
+        bgMusic.src = SONG_LIST[0].src;
+        bgMusic.load();
+      }
       initMusicButton();
       restoreCardHearts();
 
@@ -1272,6 +1278,28 @@
     let bgMusic = null, musicPlaying = false, currentSongIdx = 0;
     let songToastTimer = null, loadTimeout = null, retryCount = 0;
     const MAX_RETRIES = 1, LOAD_TIMEOUT = 25000;
+    const TARGET_VOLUME = 0.75, FADE_MS = 1800;
+    let fadeTimer = null;
+
+    // 音量渐进增大，避免突然响一下吓人
+    function startFadeIn() {
+      if (!bgMusic) return;
+      clearInterval(fadeTimer);
+      bgMusic.volume = 0;
+      const steps = 36; // 每50ms一步，共1800ms
+      const inc = TARGET_VOLUME / steps;
+      let step = 0;
+      fadeTimer = setInterval(() => {
+        step++;
+        if (step >= steps) {
+          bgMusic.volume = TARGET_VOLUME;
+          clearInterval(fadeTimer);
+          fadeTimer = null;
+        } else {
+          bgMusic.volume = Math.min(TARGET_VOLUME, inc * step);
+        }
+      }, FADE_MS / steps);
+    }
 
     function initMusic() {
       bgMusic = document.getElementById('bgMusic');
@@ -1279,11 +1307,13 @@
       bgMusic.addEventListener('ended', playNextSong);
       bgMusic.addEventListener('error', onLoadError);
       bgMusic.addEventListener('canplay', onCanPlay);
-      // 每首歌自动跳过前 6 秒，直接进入正曲
+      // 勋章跳过前15秒前奏，其他歌曲跳过前6秒
       bgMusic.addEventListener('loadedmetadata', () => {
-        if (bgMusic.duration > 6) bgMusic.currentTime = 6;
+        const song = SONG_LIST[currentSongIdx];
+        const skipSec = (song && song.title === '勋章') ? 15 : 6;
+        if (bgMusic.duration > skipSec) bgMusic.currentTime = skipSec;
       });
-      bgMusic.preload = 'metadata';
+      bgMusic.preload = 'auto';
     }
 
     function loadAndPlay(idx) {
@@ -1303,6 +1333,7 @@
           clearTimeout(loadTimeout);
           musicPlaying = true; retryCount = 0;
           document.getElementById('musicToggle').classList.add('playing');
+          startFadeIn();
           showSongInfo(song);
           preloadNextSong();
         }).catch(() => { /* 等待 canplay 事件 */ });
@@ -1315,6 +1346,7 @@
         clearTimeout(loadTimeout);
         musicPlaying = true; retryCount = 0;
         document.getElementById('musicToggle').classList.add('playing');
+        startFadeIn();
         showSongInfo(SONG_LIST[currentSongIdx]);
       }).catch(() => {});
     }
@@ -1396,6 +1428,7 @@
         bgMusic.play().then(() => {
           musicPlaying = true;
           document.getElementById('musicToggle').classList.add('playing');
+          startFadeIn();
         }).catch(() => showToast('音乐加载失败~'));
       }
     }
@@ -1403,6 +1436,8 @@
     function stopMusic() {
       if (!bgMusic) return;
       clearTimeout(loadTimeout);
+      clearInterval(fadeTimer);
+      fadeTimer = null;
       bgMusic.pause();
       document.getElementById('musicToggle').classList.remove('playing');
       musicPlaying = false; retryCount = 0;
