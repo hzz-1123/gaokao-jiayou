@@ -1279,6 +1279,10 @@
       bgMusic.addEventListener('ended', playNextSong);
       bgMusic.addEventListener('error', onLoadError);
       bgMusic.addEventListener('canplay', onCanPlay);
+      // 每首歌自动跳过前 6 秒，直接进入正曲
+      bgMusic.addEventListener('loadedmetadata', () => {
+        if (bgMusic.duration > 6) bgMusic.currentTime = 6;
+      });
       bgMusic.preload = 'metadata';
     }
 
