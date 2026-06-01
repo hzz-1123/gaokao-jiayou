@@ -1270,37 +1270,66 @@
 
     // ==================== 音乐播单 ====================
     let bgMusic = null, musicPlaying = false, currentSongIdx = 0;
-    let songToastTimer = null;
+    let songToastTimer = null, loadTimeout = null, retryCount = 0;
+    const MAX_RETRIES = 1, LOAD_TIMEOUT = 25000;
 
     function initMusic() {
       bgMusic = document.getElementById('bgMusic');
       if (!bgMusic) return;
       bgMusic.addEventListener('ended', playNextSong);
-      bgMusic.addEventListener('error', () => {
-        // 当前歌曲加载失败，跳过播放下一首
-        currentSongIdx = (currentSongIdx + 1) % SONG_LIST.length;
-        if (musicPlaying) {
-          loadAndPlay(currentSongIdx);
-        }
-      });
+      bgMusic.addEventListener('error', onLoadError);
+      bgMusic.addEventListener('canplay', onCanPlay);
+      bgMusic.preload = 'metadata';
     }
 
     function loadAndPlay(idx) {
       if (!bgMusic || idx >= SONG_LIST.length) return;
-      currentSongIdx = idx;
+      currentSongIdx = idx; retryCount = 0;
+      clearTimeout(loadTimeout);
       const song = SONG_LIST[idx];
+      showToast('🔄 ' + song.title + ' 加载中...');
+      loadTimeout = setTimeout(() => {
+        if (!musicPlaying) showToast(song.title + ' 加载较慢，请耐心等待~');
+      }, LOAD_TIMEOUT);
       bgMusic.src = song.src;
       bgMusic.load();
+      const playPromise = bgMusic.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          clearTimeout(loadTimeout);
+          musicPlaying = true; retryCount = 0;
+          document.getElementById('musicToggle').classList.add('playing');
+          showSongInfo(song);
+        }).catch(() => { /* 等待 canplay 事件 */ });
+      }
+    }
+
+    function onCanPlay() {
+      if (musicPlaying) return;
       bgMusic.play().then(() => {
-        musicPlaying = true;
+        clearTimeout(loadTimeout);
+        musicPlaying = true; retryCount = 0;
         document.getElementById('musicToggle').classList.add('playing');
-        showSongInfo(song);
-      }).catch(() => {
-        // 文件不存在则跳过
-        showToast(song.title + ' 文件暂未找到，切下一首~');
+        showSongInfo(SONG_LIST[currentSongIdx]);
+      }).catch(() => {});
+    }
+
+    function onLoadError() {
+      if (retryCount < MAX_RETRIES) {
+        retryCount++;
+        showToast('正在重试...(' + retryCount + '/' + MAX_RETRIES + ')');
+        setTimeout(() => {
+          bgMusic.src = SONG_LIST[currentSongIdx].src;
+          bgMusic.load();
+          bgMusic.play().catch(() => {});
+        }, 2000);
+      } else {
+        clearTimeout(loadTimeout);
+        showToast(SONG_LIST[currentSongIdx].title + ' 加载失败，切下一首~');
         musicPlaying = false;
         document.getElementById('musicToggle').classList.remove('playing');
-      });
+        setTimeout(() => { if (!musicPlaying) playNextSong(); }, 1500);
+      }
     }
 
     function playNextSong() {
@@ -1356,9 +1385,10 @@
 
     function stopMusic() {
       if (!bgMusic) return;
+      clearTimeout(loadTimeout);
       bgMusic.pause();
       document.getElementById('musicToggle').classList.remove('playing');
-      musicPlaying = false;
+      musicPlaying = false; retryCount = 0;
       showToast('音乐已关闭');
     }
 
