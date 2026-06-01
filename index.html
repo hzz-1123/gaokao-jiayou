@@ -496,7 +496,8 @@
   </div>
 
   <!-- ==================== 音乐按钮 ==================== -->
-  <button class="music-toggle-btn" id="musicToggle" onclick="toggleMusic()" title="背景音乐">
+  <!-- 点击切歌 / 长按关闭 -->
+  <button class="music-toggle-btn" id="musicToggle" title="点击切歌 · 长按关闭">
     <i class="fa fa-music"></i>
   </button>
 
@@ -1013,6 +1014,7 @@
       startCountdown();
       initBreathingAnimation();
       initMusic();
+      initMusicButton();
       restoreCardHearts();
 
       // Hero 淡入
@@ -1312,23 +1314,52 @@
       songToastTimer = setTimeout(() => {}, 2000);
     }
 
-    function toggleMusic() {
-      if (!bgMusic) return;
-      if (musicPlaying) {
-        bgMusic.pause();
-        document.getElementById('musicToggle').classList.remove('playing');
-        musicPlaying = false;
-      } else {
-        // 如果还没加载过歌曲，从第一首开始
-        if (!bgMusic.src || bgMusic.src === window.location.href) {
-          loadAndPlay(0);
-        } else {
-          bgMusic.play().then(() => {
-            musicPlaying = true;
-            document.getElementById('musicToggle').classList.add('playing');
-          }).catch(() => showToast('音乐加载失败，请检查文件~'));
+    // 点击切歌 / 长按关闭
+    let pressTimer = null;
+    function initMusicButton() {
+      const btn = document.getElementById('musicToggle');
+      if (!btn) return;
+
+      function startPress(e) { e.preventDefault();
+        pressTimer = setTimeout(() => {
+          pressTimer = null;
+          stopMusic();
+        }, 600);
+      }
+      function cancelPress(e) {
+        if (pressTimer) { clearTimeout(pressTimer); pressTimer = null;
+          e.preventDefault();
+          if (!musicPlaying) { startMusic(); }
+          else { playNextSong(); }
         }
       }
+
+      btn.addEventListener('touchstart', startPress, { passive: false });
+      btn.addEventListener('touchend', cancelPress, { passive: false });
+      btn.addEventListener('touchmove', () => { clearTimeout(pressTimer); pressTimer = null; }, { passive: true });
+      btn.addEventListener('mousedown', startPress);
+      btn.addEventListener('mouseup', cancelPress);
+      btn.addEventListener('mouseleave', () => { clearTimeout(pressTimer); pressTimer = null; });
+    }
+
+    function startMusic() {
+      if (!bgMusic) return;
+      if (!bgMusic.src || bgMusic.src === window.location.href) {
+        loadAndPlay(0);
+      } else {
+        bgMusic.play().then(() => {
+          musicPlaying = true;
+          document.getElementById('musicToggle').classList.add('playing');
+        }).catch(() => showToast('音乐加载失败~'));
+      }
+    }
+
+    function stopMusic() {
+      if (!bgMusic) return;
+      bgMusic.pause();
+      document.getElementById('musicToggle').classList.remove('playing');
+      musicPlaying = false;
+      showToast('音乐已关闭');
     }
 
     // ==================== Checklist ====================
