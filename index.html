@@ -737,7 +737,8 @@
   <div class="toast" id="toast"></div>
 
   <!-- ==================== 隐藏音乐元素 ==================== -->
-  <audio id="bgMusic" loop preload="none" src="audio/bgm.mp3"></audio>
+  <!-- ★ 歌曲列表：替换或新增歌曲时，修改下方 SONG_LIST 数组即可 -->
+  <audio id="bgMusic" preload="none"></audio>
 
   <script>
     // ==================== 常量配置 ====================
@@ -760,8 +761,14 @@
       '既然你找到了这里——那就再告诉你一次：你是被这个世界偏爱的小朋友。',
     ];
 
-    // ★ 背景音乐：把 audio/bgm.mp3 替换为你的音乐文件
-    const MUSIC_SRC = 'audio/bgm.mp3';
+    // ★ 背景音乐歌单：替换文件名即可，支持 mp3/wav/ogg 等格式
+    //    歌曲文件放在 index.html 同目录即可
+    const SONG_LIST = [
+      { title: '做自己的光，不需要太亮', artist: '善宇', src: '善宇 - 做自己的光，不需要太亮.mp3' },
+      { title: '逐光', artist: '王源', src: '逐光-王源-5d3eb2b2632a.mp3' },
+      { title: '下一个天亮', artist: '郭静', src: '郭静 - 下一个天亮-25ca4ae94f7a.mp3' },
+      { title: '勋章', artist: '鹿晗', src: '鹿晗 - 勋章-7aeec6632aad.mp3' },
+    ];
 
     // ==================== Canvas 粒子系统 ====================
     class ParticleSystem {
@@ -1256,14 +1263,52 @@
       setLiked(liked);
     }
 
-    // ==================== 音乐 ====================
-    let bgMusic = null, musicPlaying = false;
+    // ==================== 音乐播单 ====================
+    let bgMusic = null, musicPlaying = false, currentSongIdx = 0;
+    let songToastTimer = null;
+
     function initMusic() {
       bgMusic = document.getElementById('bgMusic');
-      if (!MUSIC_SRC || MUSIC_SRC === 'audio/bgm.mp3') {
-        // 占位状态，按钮照常显示
-      }
+      if (!bgMusic) return;
+      bgMusic.addEventListener('ended', playNextSong);
+      bgMusic.addEventListener('error', () => {
+        // 当前歌曲加载失败，跳过播放下一首
+        currentSongIdx = (currentSongIdx + 1) % SONG_LIST.length;
+        if (musicPlaying) {
+          loadAndPlay(currentSongIdx);
+        }
+      });
     }
+
+    function loadAndPlay(idx) {
+      if (!bgMusic || idx >= SONG_LIST.length) return;
+      currentSongIdx = idx;
+      const song = SONG_LIST[idx];
+      bgMusic.src = song.src;
+      bgMusic.load();
+      bgMusic.play().then(() => {
+        musicPlaying = true;
+        document.getElementById('musicToggle').classList.add('playing');
+        showSongInfo(song);
+      }).catch(() => {
+        // 文件不存在则跳过
+        showToast(song.title + ' 文件暂未找到，切下一首~');
+        musicPlaying = false;
+        document.getElementById('musicToggle').classList.remove('playing');
+      });
+    }
+
+    function playNextSong() {
+      currentSongIdx = (currentSongIdx + 1) % SONG_LIST.length;
+      loadAndPlay(currentSongIdx);
+    }
+
+    function showSongInfo(song) {
+      clearTimeout(songToastTimer);
+      showToast('🎵 ' + song.title + ' - ' + song.artist);
+      songToastTimer = setTimeout(() => {}, 2000);
+    }
+
     function toggleMusic() {
       if (!bgMusic) return;
       if (musicPlaying) {
@@ -1271,10 +1316,15 @@
         document.getElementById('musicToggle').classList.remove('playing');
         musicPlaying = false;
       } else {
-        bgMusic.play().then(() => {
-          document.getElementById('musicToggle').classList.add('playing');
-          musicPlaying = true;
-        }).catch(() => showToast('背景音乐还未添加哦~'));
+        // 如果还没加载过歌曲，从第一首开始
+        if (!bgMusic.src || bgMusic.src === window.location.href) {
+          loadAndPlay(0);
+        } else {
+          bgMusic.play().then(() => {
+            musicPlaying = true;
+            document.getElementById('musicToggle').classList.add('playing');
+          }).catch(() => showToast('音乐加载失败，请检查文件~'));
+        }
       }
     }
 
