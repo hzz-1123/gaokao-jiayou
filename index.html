@@ -1080,14 +1080,14 @@
 
     // ==================== 音频卡片 ====================
     const audioTracks = [
-      { title: '早上醒来听这一条', desc: '给你一点早晨的勇气', icon: '☀️', src: 'audio/audio1.mp3' },
-      { title: '紧张的时候听这一条', desc: '先深呼吸，我陪你慢慢来', icon: '💆‍♀️', src: 'audio/audio2.mp3' },
-      { title: '睡前放松听这一条', desc: '今天已经很棒了，早点休息', icon: '🌙', src: 'audio/audio3.mp3' },
-      { title: '进考场前听这一条', desc: '别怕，你准备得很好', icon: '🎒', src: 'audio/audio4.mp3' },
-      { title: '想哭的时候听这一条', desc: '委屈可以有，但不要怀疑自己', icon: '💧', src: 'audio/audio5.mp3' },
-      { title: '考完一科后听这一条', desc: '不管发挥如何，下一科继续向前', icon: '📝', src: 'audio/audio6.mp3' },
-      { title: '觉得累的时候听这一条', desc: '累了就停一停，抱抱你', icon: '🫂', src: 'audio/audio7.mp3' },
-      { title: '永远都可以听这一条', desc: '这是长期有效的喜欢和陪伴', icon: '💝', src: 'audio/audio8.mp3' },
+      { title: '早上醒来听这一条', desc: '给你一点早晨的勇气', icon: '☀️', src: '标准录音 6等8项文件/标准录音 1.mp3' },
+      { title: '紧张的时候听这一条', desc: '先深呼吸，我陪你慢慢来', icon: '💆‍♀️', src: '标准录音 6等8项文件/标准录音 2.mp3' },
+      { title: '睡前放松听这一条', desc: '今天已经很棒了，早点休息', icon: '🌙', src: '标准录音 6等8项文件/标准录音 3.mp3' },
+      { title: '进考场前听这一条', desc: '别怕，你准备得很好', icon: '🎒', src: '标准录音 6等8项文件/标准录音 4.mp3' },
+      { title: '想哭的时候听这一条', desc: '委屈可以有，但不要怀疑自己', icon: '💧', src: '标准录音 6等8项文件/标准录音 5.mp3' },
+      { title: '考完一科后听这一条', desc: '不管发挥如何，下一科继续向前', icon: '📝', src: '标准录音 6等8项文件/标准录音 6.mp3' },
+      { title: '觉得累的时候听这一条', desc: '累了就停一停，抱抱你', icon: '🫂', src: '标准录音 6等8项文件/标准录音 7.mp3' },
+      { title: '永远都可以听这一条', desc: '这是长期有效的喜欢和陪伴', icon: '💝', src: '标准录音 6等8项文件/标准录音 8.mp3' },
     ];
     let currentAudio = null, currentCard = null;
 
@@ -1300,6 +1300,7 @@
           musicPlaying = true; retryCount = 0;
           document.getElementById('musicToggle').classList.add('playing');
           showSongInfo(song);
+          preloadNextSong();
         }).catch(() => { /* 等待 canplay 事件 */ });
       }
     }
@@ -1335,6 +1336,18 @@
     function playNextSong() {
       currentSongIdx = (currentSongIdx + 1) % SONG_LIST.length;
       loadAndPlay(currentSongIdx);
+    }
+
+    // 后台预加载下一首，减少切歌等待
+    let preloadAudio = null;
+    function preloadNextSong() {
+      const nextIdx = (currentSongIdx + 1) % SONG_LIST.length;
+      if (!preloadAudio) {
+        preloadAudio = new Audio();
+        preloadAudio.preload = 'auto';
+      }
+      preloadAudio.src = SONG_LIST[nextIdx].src;
+      preloadAudio.load();
     }
 
     function showSongInfo(song) {
